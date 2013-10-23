@@ -168,22 +168,26 @@ ko.pontillo.rest.entity = function (dataModel) {
         return $.ajax({
             type: "POST",
             url: url,
-           // contentType: "application/json",
+            contentType: "application/json",
             dataType: "json",
 	        data: item.toJSON(),
 
-/*			user: "mobila",
+
+			user: "mobila",
 			password: "z754Z71zLoss",  
 			xhrFields: {
 		       withCredentials: true
 		    },
-		    crossDomain: true,*/
+		    crossDomain: true,
+
+
 
 		    beforeSend: function () {
 
                 item.isUpdating(true);
                 console.log("Posting resource at " + url + " ...");
             },
+
             statusCode: {
                 201: function (data, textStatus, jqXHR) {
                     // Update the data

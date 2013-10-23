@@ -9,10 +9,10 @@
  </head>
  
  <script type='text/javascript' src='knockout-2.3.0.js'></script>
- <script type='text/javascript' src='mapping.js'></script>
+ <script type='text/javascript' src='knockout.mapping.js'></script>
  <script type='text/javascript' src='jquery-1.8.3.min.js'></script>
  <script type='text/javascript' src='crypto.js'></script>
- <script type='text/javascript' src='rest.js'></script>
+ <script type='text/javascript' src='ko.pontillo.rest.js'></script>
 
  <body>
 	<!-- div data-bind="if: person().isLoaded()"-->
@@ -20,17 +20,43 @@
         <input type="text" data-bind="value: person().loginId" />
         <input type="text" data-bind="value: person().password" />
         <input type="button" id="Create" value="Create" />
-        <input type="button" id="delete" value="Delete"/>
-        <input type="button" id="undo" value= "Undo"/>
+		<input type="button" id="Login" value="Login" />
     </div>
+
+	<br>
+
+	<div >
+        <input type="text" data-bind="value: register_user().firstName" />
+        <input type="text" data-bind="value: register_user().lastName" />
+        <input type="text" data-bind="value: register_user().street" />
+        <input type="text" data-bind="value: register_user().houseNumber" />
+        <input type="text" data-bind="value: register_user().city" />
+        <input type="text" data-bind="value: register_user().postalCode" />
+
+        <input type="button" id="Register" value="Register" />
+	</div>
 
  </body>
 
  <script>
+
+			$.get( 
+             "http://144.76.40.174:8080/notifyme-engine-backend/services/users",
+             //{ loginId:"aUsername",password:"aPassword"},
+		
+             function(data) {
+			 				console.log(data);
+
+             }, "json"
+
+          );
+
 	// The ViewModel class
     var VM = function () {
         var self = this;
         self.person;
+		self.register_user;
+
     };
 
     // Create a new ViewModel object
@@ -38,11 +64,22 @@
 
     // Instantiate a person as a REST entity
 	mVM.person = new ko.pontillo.rest.entity();
+	mVM.register_user = new ko.pontillo.rest.entity();
     
 	mVM.person.newEntity();
+	mVM.register_user.newEntity();
 
     // Get the person
     //mVM.person.Get("api/people/123");
+
+	function response(data) {
+
+		alert(data.getResponseHeader('location'));
+
+		console.log(data.getResponseHeader('location'));
+
+	}
+
 
     // Click binding to the save button
     $("input#Create").click(function() {
@@ -51,13 +88,22 @@
             // PUT (update) the person
 			alert('1');
             mVM.person.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/users", response );
+
        //}
     });
 
-	function response() {
+    $("input#Login").click(function() {
+			alert('Login');
+            mVM.person.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/user/authenticate", response );
+    });
 
-		alert("success");
-	}
+
+    $("input#Register").click(function() {
+		alert('2');
+        mVM.register_user.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/eb2fac3c-9ef1-482e-9bd1-446e79510378/registration", response );
+    });
+
+	
 
 
     ko.applyBindings(mVM);
