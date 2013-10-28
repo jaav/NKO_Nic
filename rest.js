@@ -132,10 +132,21 @@ ko.pontillo.rest.entity = function (dataModel) {
     };
 
     // The GET method, reads an element from an URL and updates the model
-    item.Get = function (url, callback) {
+    item.Get = function (url, callback, conType) {
         return $.ajax({
             type: 'GET',
-            url: url,
+            url: url,		    
+			contentType: conType,
+
+            dataType: "json",
+	        data: item.toJSON(),
+
+			user: "mobila",
+			password: "z754Z71zLoss",  
+			xhrFields: {
+		       withCredentials: true
+		    },
+		    crossDomain: true,
             beforeSend: function () {
                 item.isUpdating(true);
                 console.log("Getting resource at " + url + " ...");
@@ -143,12 +154,19 @@ ko.pontillo.rest.entity = function (dataModel) {
             statusCode: {
                 200: function (data, textStatus, jqXHR) {
                     // Update the data
+					if (callback) callback(jqXHR);
+
                     item.setData(data);
                     item.isGot(true);
                     item.isError(false);
                     console.log("Got the resource at " + url + " .");
                     if (callback) callback();
                 },
+				200: function(data, textStatus, b) {
+		
+					if (callback) callback(data);
+		       	    item.isUpdating(false);
+				},
                 304: function () {
                 }
             },
@@ -156,22 +174,22 @@ ko.pontillo.rest.entity = function (dataModel) {
                 item.isError(true);
                 console.log("Error while getting the resource at " + url + " .");
             }
-        }).always(function () {
+        });/*.always(function () {
        	    item.isUpdating(false);
-        });
+        });*/
     };
 
     // The POST method, adds an element to an URL and updates the model
-    item.Post = function (url, callback) {
-		alert( item.toJSON() );
+    item.Post = function (url, callback, conType) {
 
+alert(item.toJSON());
         return $.ajax({
             type: "POST",
             url: url,
-            contentType: "application/json",
+            contentType: conType,
+
             dataType: "json",
 	        data: item.toJSON(),
-
 
 			user: "mobila",
 			password: "z754Z71zLoss",  
@@ -180,56 +198,79 @@ ko.pontillo.rest.entity = function (dataModel) {
 		    },
 		    crossDomain: true,
 
+		    beforeSend: function (xhr) {
 
-
-		    beforeSend: function () {
-
-                item.isUpdating(true);
+				item.isUpdating(true);
                 console.log("Posting resource at " + url + " ...");
-            },
-
+            },			
             statusCode: {
                 201: function (data, textStatus, jqXHR) {
                     // Update the data
-                    item.setData(data);
+					if (callback) callback(jqXHR);
+
+					item.setData(data);
                     item.isGot(true);
                     item.isError(false);
-                    console.log("Posted the resource at " + url + " .");
-                    if (callback) callback();
+                    console.log("Posted the resource at " + url + " .");                    
                 },
+				200: function(data, textStatus, b) {
+		
+					if (callback) callback(data);
+		       	    item.isUpdating(false);
+				},
                 304: function () {
-                }
+                }				
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 item.isError(true);
                 console.log("Error while posting the resource at " + url + " .");
             }
-        }).always(function () {
+        });/*.always(function (data, textstatus, b) {
+
+			//if (callback) callback(data);
+
        	    item.isUpdating(false);
-        });
+        });*/
     };
 
     // The PUT method, updates an element to an URL and updates the model
-    item.Put = function (url, callback) {
+    item.Put = function (url, callback, conType) {
+
+		alert(item.toJSON());
         return $.ajax({
             type: "PUT",
             url: url,
-            contentType: "application/json",
-            dataType: "json",
-            data: item.toJSON(),
+            contentType: conType,
+            
+			dataType: "json",
+	        data: item.toJSON(),
+
+			user: "mobila",
+			password: "z754Z71zLoss",  
+			xhrFields: {
+		       withCredentials: true
+		    },
+		    crossDomain: true,
+
             beforeSend: function () {
                 item.isUpdating(true);
                 console.log("Putting resource at " + url + " ...");
-            },
+            },				
             statusCode: {
                 201: function (data, textStatus, jqXHR) {
                     // Update the data
+					if (callback) callback(jqXHR);
+
                     item.setData(data);
                     item.isGot(true);
                     item.isError(false);
-                    console.log("Put the resource at " + url + " .");
-                    if (callback) callback();
+                    console.log("Put the resource at " + url + " .");                    
                 },
+				200: function(data, textStatus, b) {
+		
+					if (callback) callback(data);
+		       	    item.isUpdating(false);
+				},
                 304: function () {
                 }
             },
@@ -237,9 +278,9 @@ ko.pontillo.rest.entity = function (dataModel) {
                 item.isError(true);
                 console.log("Error while putting the resource at " + url + " .");
             }
-        }).always(function () {
+        });/*.always(function () {
        	    item.isUpdating(false);
-        });
+        });*/
     };
 
     // The DELETE method, deletes an element from an URL

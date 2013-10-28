@@ -9,137 +9,205 @@
  </head>
  
  <script type='text/javascript' src='knockout-2.3.0.js'></script>
- <script type='text/javascript' src='knockout.mapping.js'></script>
+ <script type='text/javascript' src='mapping.js'></script>
  <script type='text/javascript' src='jquery-1.8.3.min.js'></script>
- <script type='text/javascript' src='crypto.js'></script>
- <script type='text/javascript' src='ko.pontillo.rest.js'></script>
+ <script type='text/javascript' src='rest.js'></script>
 
- <body>
-	<!-- div data-bind="if: person().isLoaded()"-->
-	<div >
-        <input type="text" data-bind="value: person().loginId" />
-        <input type="text" data-bind="value: person().password" />
-        <input type="button" id="Create" value="Create" />
-		<input type="button" id="Login" value="Login" />
+ <style>
+	.api_block {
+		border:1px solid black;
+		padding:10px;
+		margin-top:10px;
+	}
+ </style>
+  <body>
+	<div class="api_block">
+		<h3>Create User API</h3>
+		<label>loginId</label>
+		<input type="text" data-bind="value: person1().loginId" />
+		<label>password</label>
+        <input type="text" data-bind="value: person1().password" />
+
+		<button data-bind="click: createUserClick">Create User</button>		
     </div>
 
-	<br>
+	<div class="api_block">
+		<h3>Login User API</h3>
+		<label>loginId</label>
+		<input type="text" data-bind="value: person2().loginId" />
+		<label>password</label>
+        <input type="text" data-bind="value: person2().password" />
 
-	<div >
-        <input type="text" data-bind="value: register_user().firstName" />
-        <input type="text" data-bind="value: register_user().lastName" />
-        <input type="text" data-bind="value: register_user().street" />
-        <input type="text" data-bind="value: register_user().houseNumber" />
-        <input type="text" data-bind="value: register_user().city" />
-        <input type="text" data-bind="value: register_user().postalCode" />
+		<button data-bind="click: loginUserClick">Login User</button>		
+    </div>
 
-        <input type="button" id="Register" value="Register" />
+	<div class="api_block">
+		<h3>Register User API</h3>
+		<label>firstName</label>
+        <input type="text" data-bind="value: person3().firstName" />
+		<label>lastName</label>
+        <input type="text" data-bind="value: person3().lastName" />
+		<label>street</label>
+        <input type="text" data-bind="value: person3().street" />
+		<label>houseNumber</label>
+        <input type="text" data-bind="value: person3().houseNumber" />
+		<label>city</label>
+        <input type="text" data-bind="value: person3().city" />
+		<label>postalCode</label>
+        <input type="text" data-bind="value: person3().postalCode" />
+		
+		<label>registeredCommunicationChannels -> SMS -> communicationChannel</label>
+		<input type="text" data-bind="value: person3().registeredCommunicationChannels().SMS().communicationChannel" />
+		<br>
+		<label>registeredCommunicationChannels -> EMAIL -> communicationChannel</label>
+		<input type="text" data-bind="value: person3().registeredCommunicationChannels().EMAIL().communicationChannel" />
+		
+		<button data-bind="click: registerUserClick">Register User</button>	
 	</div>
 
+	<div class="api_block">
+		<h3>Add/Remove communication channel API</h3>
+
+		<label>twitter-id</label>
+        <input type="text" data-bind="value: person4().email" />
+
+		<button data-bind="click: addChannel">ADD</button>	
+		<button data-bind="click: removeChannel">Remove</button>	
+    </div>
  </body>
 
  <script>
-
-			$.get( 
-             "http://144.76.40.174:8080/notifyme-engine-backend/services/users",
-             //{ loginId:"aUsername",password:"aPassword"},
-		
-             function(data) {
-			 				console.log(data);
-
-             }, "json"
-
-          );
+	var sampletype = {
+	 "firstName": "John",
+	 "lastName": "Doe",
+	 "street": 5,
+	 "houseNumber": "22",
+	 "city": "New York",
+	 "postalCode": "32233",
+	 "subscriptions": [ 1, 2 ],
+	 "registeredCommunicationChannels": {
+	  "SMS": {
+	   "communicationChannel": "SMS",
+	   "activated": true,
+	   "authenticated": true,
+	   "phoneNumber": "+49111111111",
+	   "pin": 4711,
+	   "authTries": 1
+	  },
+	  "EMAIL": {
+	   "communicationChannel": "EMAIL",
+	   "email": "test@example.org"
+	  }
+	 }
+	};
 
 	// The ViewModel class
     var VM = function () {
         var self = this;
-        self.person;
-		self.register_user;
+
+		self.person1 = new ko.pontillo.rest.entity();			// create user api
+		self.person2 = new ko.pontillo.rest.entity();;			// login user api
+		self.person3 = new ko.pontillo.rest.entity(sampletype); // register user api
+		self.person4 = new ko.pontillo.rest.entity();			// add/remove communication channel
+
+		self.person1.newEntity();
+		self.person2.newEntity();
+		self.person3.newEntity();
+		self.person4.newEntity();
+
+		self.createUserClick = function() {
+			self.person1.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/users", createUser, "application/json" );
+		};
+
+		self.loginUserClick = function() {
+			self.person2.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/user/authenticateJson", loginUser, "application/json" /*"application/x-www-form-urlencoded"*/);
+		};
+
+		self.registerUserClick = function() {
+
+			alert('register');
+			var uuid = "48eea9ab-d908-4168-944b-f43ef53b5ea5";
+	        self.person3.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + uuid + "/registration", registerUser );
+	    };
+
+		self.addChannel = function() {
+
+			alert('add channel');
+			var uuid = "48eea9ab-d908-4168-944b-f43ef53b5ea5";
+
+			self.person4.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + uuid + "/registration/channel/EMAIL", channel );
+		};
+
+		self.removeChannel = function() {
+
+
+		};
 
     };
 
     // Create a new ViewModel object
     var mVM = new VM();
 
-    // Instantiate a person as a REST entity
-	mVM.person = new ko.pontillo.rest.entity();
-	mVM.register_user = new ko.pontillo.rest.entity();
-    
-	mVM.person.newEntity();
-	mVM.register_user.newEntity();
+	ko.applyBindings(mVM);
 
-    // Get the person
-    //mVM.person.Get("api/people/123");
 
-	function response(data) {
 
-		alert(data.getResponseHeader('location'));
+	// checking response
+	function createUser(data) {
 
-		console.log(data.getResponseHeader('location'));
-
+		alert("Success !  url :" + data.getResponseHeader('location'));
 	}
 
+	function loginUser(data) {
+		var UserFacadeImpl = ["uuid","login-id", "password", "created","last-update", "last-login", "login-count", "is-locked","is-administrator"  ];
 
-    // Click binding to the save button
-    $("input#Create").click(function() {
-        // First checks if the entity has changed
-        //if (mVM.person.hasChanged()) {
-            // PUT (update) the person
-			alert('1');
-            mVM.person.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/users", response );
+		var s = "";
+		for (var i=0; i< UserFacadeImpl.length; i++)
+		{
+			s += UserFacadeImpl[i] + ":" + data[UserFacadeImpl[i]] + "  |  ";
+		}
 
-       //}
-    });
-
-    $("input#Login").click(function() {
-			alert('Login');
-            mVM.person.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/user/authenticate", response );
-    });
+		alert("Success !  " + s);
 
 
-    $("input#Register").click(function() {
-		alert('2');
-        mVM.register_user.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/eb2fac3c-9ef1-482e-9bd1-446e79510378/registration", response );
-    });
+		/*public class UserFacadeImpl {
 
-	
+			@XmlID
+			@XmlAttribute(name = "uuid")
+			public String uuid;
 
+			@XmlElement(name = "login-id")
+			public String loginId;
 
-    ko.applyBindings(mVM);
+			@XmlElement(name = "password")
+			public String password;
 
+			@XmlElement(name = "created")
+			public String created;
 
-	
+			@XmlElement(name = "last-update")
+			public String lastUpdate;
 
+			@XmlElement(name = "last-login")
+			public String lastLogin;
 
-	/*function WebmailViewModel() {
-		// Data
-		var self = this;
-		self.folders = ['Inbox', 'Archive', 'Sent', 'Spam'];
-		self.chosenFolderId = ko.observable();
-		self.chosenFolderData = ko.observable();
-		self.chosenMailData = ko.observable();
+			@XmlElement(name = "login-count")
+			public int loginCount;
 
-		// Behaviours    
-		self.goToFolder = function(folder) { 
-			self.chosenFolderId(folder);
-			self.chosenMailData(null); // Stop showing a mail
-			$.get('http://144.76.40.174:8080/notifyme-engine-backend/services/users', { folder: folder }, self.chosenFolderData);
-		};
+			@XmlElement(name = "is-locked")
+			public boolean isLocked;
 
+			@XmlElement(name = "is-administrator")
+			public boolean isAdministrator;
+		}*/
+	}
 
+    function registerUser(data) {
 
-		self.goToMail = function(mail) { 
-			self.chosenFolderId(mail.folder);
-			self.chosenFolderData(null); // Stop showing a folder
-			$.get("/mail", { mailId: mail.id }, self.chosenMailData);
-		};
+		alert("success!");
+	}
 
-		// Show inbox by default
-		self.goToFolder('Inbox');
-	};
-
-	ko.applyBindings(new WebmailViewModel());*/
  </script>
+
 
 </html>
