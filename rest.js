@@ -235,11 +235,11 @@ alert(item.toJSON());
 
     // The PUT method, updates an element to an URL and updates the model
     item.Put = function (url, callback, conType) {
-
-		alert(item.toJSON());
+		
         return $.ajax({
             type: "PUT",
             url: url,
+			Accept: conType,
             contentType: conType,
             
 			dataType: "json",
@@ -272,7 +272,13 @@ alert(item.toJSON());
 		       	    item.isUpdating(false);
 				},
                 304: function () {
-                }
+                },
+
+				204: function(data, textStatus, b) {
+		
+					if (callback) callback(data);
+		       	    item.isUpdating(false);
+				},
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 item.isError(true);
@@ -284,31 +290,70 @@ alert(item.toJSON());
     };
 
     // The DELETE method, deletes an element from an URL
-    item.Delete = function (url, callback) {
+    item.Delete = function (url, callback, conType) {
+
         return $.ajax({
             type: "DELETE",
             url: url,
-            contentType: "application/json",
-            dataType: "json",
+
+			Accept: conType,
+            contentType: conType,
+            
+			dataType: "json",
+	        //data: item.toJSON(),
+
+			user: "mobila",
+			password: "z754Z71zLoss",  
+			xhrFields: {
+		       withCredentials: true
+		    },
+		    crossDomain: true,
+
             beforeSend: function () {
                 item.isUpdating(true);
                 console.log("Deleting resource at " + url + " ...");
             },
-            success: function (data, textStatus, jqXHR) {
+/*            success: function (data, textStatus, jqXHR) {
                 // Update the data
-                item.setData(data);
+                if (callback) callback();
+
+				item.setData(data);
                 item.isGot(true);
                 item.isError(false);
                 console.log("Deleted the resource at " + url + " .");
-                if (callback) callback();
+                
+            },*/
+			 statusCode: {
+                201: function (data, textStatus, jqXHR) {
+                    // Update the data
+					if (callback) callback(jqXHR);
+
+                    item.setData(data);
+                    item.isGot(true);
+                    item.isError(false);
+                    console.log("Put the resource at " + url + " .");                    
+                },
+				200: function(data, textStatus, b) {
+		
+					if (callback) callback(data);
+		       	    item.isUpdating(false);
+				},
+                304: function () {
+                },
+
+				204: function(data, textStatus, b) {
+		
+					if (callback) callback(data);
+		       	    item.isUpdating(false);
+				},
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 item.isError(true);
                 console.log("Error while deleting the resource at " + url + " .");
             }
-        }).always(function () {
+        })/*.always(function () {
        	    item.isUpdating(false);
-        });
+        })*/;
     };
 
 

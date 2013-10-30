@@ -68,11 +68,14 @@
 	<div class="api_block">
 		<h3>Add/Remove communication channel API</h3>
 
-		<label>twitter-id</label>
+
+		<label>communicationChannel</label>
+        <input type="text" data-bind="value: person4().communicationChannel" />
+		<label>Email</label>
         <input type="text" data-bind="value: person4().email" />
 
-		<button data-bind="click: addChannel">ADD</button>	
-		<button data-bind="click: removeChannel">Remove</button>	
+		<button data-bind="click: addChannel">ADD EMAIL</button>	
+		<button data-bind="click: removeChannel">Remove EMAIL</button>	
     </div>
  </body>
 
@@ -105,6 +108,7 @@
     var VM = function () {
         var self = this;
 
+		self.uuid;
 		self.person1 = new ko.pontillo.rest.entity();			// create user api
 		self.person2 = new ko.pontillo.rest.entity();;			// login user api
 		self.person3 = new ko.pontillo.rest.entity(sampletype); // register user api
@@ -115,6 +119,8 @@
 		self.person3.newEntity();
 		self.person4.newEntity();
 
+
+		/**/
 		self.createUserClick = function() {
 			self.person1.Post("http://144.76.40.174:8080/notifyme-engine-backend/services/users", createUser, "application/json" );
 		};
@@ -125,21 +131,22 @@
 
 		self.registerUserClick = function() {
 
-			alert('register');
-			var uuid = "48eea9ab-d908-4168-944b-f43ef53b5ea5";
-	        self.person3.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + uuid + "/registration", registerUser );
+			alert('register :' + self.uuid );
+
+	        self.person3.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + self.uuid + "/registration", registerUser, "application/json");
 	    };
 
 		self.addChannel = function() {
 
 			alert('add channel');
-			var uuid = "48eea9ab-d908-4168-944b-f43ef53b5ea5";
 
-			self.person4.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + uuid + "/registration/channel/EMAIL", channel );
+			self.person4.Put("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + self.uuid + "/registration/channel/EMAIL", addChannel, "application/json" );
 		};
 
 		self.removeChannel = function() {
+			alert('remove channel');
 
+			self.person4.Delete("http://144.76.40.174:8080/notifyme-engine-backend/services/user/" + self.uuid + "/registration/channel/EMAIL", removeChannel, "application/json" );
 
 		};
 
@@ -167,9 +174,11 @@
 			s += UserFacadeImpl[i] + ":" + data[UserFacadeImpl[i]] + "  |  ";
 		}
 
+		mVM.uuid = data["uuid"];
+
 		alert("Success !  " + s);
 
-
+		console.log(s);
 		/*public class UserFacadeImpl {
 
 			@XmlID
@@ -203,6 +212,16 @@
 	}
 
     function registerUser(data) {
+
+		alert("success!");
+	}
+
+	function addChannel(data) {
+
+		alert("success!");
+	}
+
+	function removeChannel(data) {
 
 		alert("success!");
 	}
